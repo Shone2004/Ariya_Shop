@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-luxury-ivory: #FCF9F5;
+  --color-luxury-gold: #C9A54B;
+  --color-luxury-gold-dark: #B08F3E;
+  --color-luxury-gold-light: #DFCA85;
+  --color-luxury-brown: #2E241C;
+  --color-luxury-beige: #F4EFEA;
+  --color-luxury-beige-dark: #E2D9CF;
+  --color-luxury-gray: #7A7571;
+  --font-serif: "Cormorant Garamond", "Didot", "Georgia", serif;
+  --font-sans: "Inter", "Helvetica Neue", sans-serif;
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-slide-up: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-down: slide-down 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  
+  /* Aliases for Wishlist & Cart components */
+  --color-primary: #C9A54B;
+  --color-primary-hover: #B08F3E;
+  --color-brand-dark: #2E241C;
+  --color-brand-bg: #FCF9F5;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slide-down {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Base style overrides */
+body {
+  background-color: var(--color-luxury-ivory);
+  color: var(--color-luxury-brown);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6, .font-serif {
+  font-family: var(--font-serif);
+}
+
+/* Custom Scrollbar for Luxury Feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-luxury-ivory);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-luxury-beige-dark);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-luxury-gold);
+}
+
+/* Selection Highlight */
+::selection {
+  background-color: rgba(201, 165, 75, 0.2);
+  color: var(--color-luxury-brown);
+}
+
+/* Skeleton Loading Shimmer */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-bg {
+  background: linear-gradient(90deg, #f4efea 25%, #e2d9cf 50%, #f4efea 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--color-luxury-gold);
+  outline-offset: 2px;
+}
+
+/* The source logo is a square canvas. This frame sizes the visible lockup
+   independently so it remains centered without pushing the navbar taller. */
+.ariya-logo-frame {
+  width: clamp(210px, 14.5vw, 278px);
+  height: 108px;
+  overflow: hidden;
+}
+
+.ariya-logo-image {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Keep the complete hero and category tray above the fold on common laptops. */
+@media (min-width: 1024px) {
+  .ariya-hero-grid {
+    height: 620px;
+    min-height: 620px;
+    max-height: 620px;
+  }
+}
+
+@media (min-width: 1024px) and (max-height: 920px) {
+  .ariya-hero-grid {
+    height: 540px;
+    min-height: 540px;
+    max-height: 540px;
+  }
+}
