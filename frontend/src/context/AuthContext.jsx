@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }) => {
         toast.success("Welcome back!");
         
         if (userData.role === "admin") {
-          window.location.href = `http://localhost:5174/?token=${token}&user=${encodeURIComponent(JSON.stringify(userData))}`;
+          window.location.href = `https://ariya-admin.vercel.app/?token=${token}&user=${encodeURIComponent(JSON.stringify(userData))}`;
         }
         return true;
       } else {

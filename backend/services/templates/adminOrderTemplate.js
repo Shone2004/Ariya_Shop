@@ -54,8 +54,8 @@ const adminOrderTemplate = (order) => {
   const shippingPrice = order.shippingPrice > 0 ? formatMoney(order.shippingPrice) : 'Free';
   const taxPrice      = order.taxPrice > 0 ? formatMoney(order.taxPrice) : '₹0.00';
 
-  const adminDashUrl = 'http://localhost:5174/orders';
-  const orderUrl     = `http://localhost:5174/orders`;
+  const adminDashUrl = 'https://ariya-admin.vercel.app/orders';
+  const orderUrl     = `https://ariya-admin.vercel.app/orders`;
 
   const content = `
   <!-- Alert banner -->

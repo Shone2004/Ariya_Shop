@@ -47,8 +47,8 @@ app.use(compression());
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   process.env.ADMIN_URL,
-  'http://localhost:5173',
-  'http://localhost:5174'
+  'https://ariya-admin.vercel.app',
+  'https://ariya-admin.vercel.app'
 ].filter(origin => origin && origin.trim() !== '');
 
 app.use(cors({
