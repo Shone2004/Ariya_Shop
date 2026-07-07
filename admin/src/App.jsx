@@ -16,49 +16,87 @@ function App() {
     setTimeout(() => setToast(''), 2600)
   }
 
-  useEffect(() => {
-    // Process URL parameters first
-    const params = new URLSearchParams(window.location.search);
-    const urlToken = params.get("token");
-    const urlUser = params.get("user");
-    if (urlToken) {
-      localStorage.setItem("token", urlToken);
-      if (urlUser) {
-        localStorage.setItem("currentUser", decodeURIComponent(urlUser));
-      }
-      window.history.replaceState({}, document.title, window.location.pathname);
+  const fetchLiveInventory = async () => {
+  try {
+    const response = await apiClient("/products");
+    const data = await response.json();
+    setProducts(Array.isArray(data) ? data : []);
+  } catch (err) {
+    console.error("Could not fetch active inventory listings", err);
+  }
+};
+
+const fetchLiveOrders = async () => {
+  try {
+    const response = await apiClient("/orders");
+    const data = await response.json();
+    setOrders(Array.isArray(data) ? data : []);
+  } catch (err) {
+    console.error("Could not fetch active orders list", err);
+  }
+};
+
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+
+  const urlToken = params.get("token");
+  const urlUser = params.get("user");
+
+  if (urlToken) {
+    localStorage.setItem("token", urlToken);
+
+    if (urlUser) {
+      localStorage.setItem("currentUser", decodeURIComponent(urlUser));
     }
 
-    const fetchLiveInventory = async () => {
-      try {
-        const response = await apiClient('/products')
-        const data = await response.json()
-        setProducts(Array.isArray(data) ? data : [])
-      } catch (err) {
-        console.error('Could not fetch active inventory listings', err)
-      }
+   window.history.replaceState({}, "", window.location.pathname);
+  }
+const init = async () => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    window.location.href =
+      "https://www.ariyashop.in/login?redirect=admin";
+    return;
+  }
+
+  try {
+    const response = await apiClient("/auth/profile");
+
+    if (!response.ok) {
+      throw new Error("Unauthorized");
     }
 
-    const fetchLiveOrders = async () => {
-      try {
-        const response = await apiClient('/orders')
-        const data = await response.json()
-        setOrders(Array.isArray(data) ? data : [])
-      } catch (err) {
-        console.error('Could not fetch active orders list', err)
-      }
-    }
+const result = await response.json();
 
-    fetchLiveInventory()
-    fetchLiveOrders()
+if (!result.success || result.data.role !== "admin") {
+  localStorage.clear();
+  window.location.href =
+    "https://www.ariyashop.in/login?redirect=admin";
+  return;
+}
+
+    await fetchLiveInventory();
+    await fetchLiveOrders();
 
     const interval = setInterval(() => {
-      fetchLiveInventory()
-      fetchLiveOrders()
-    }, 5000)
+      fetchLiveInventory();
+      fetchLiveOrders();
+    }, 5000);
 
-    return () => clearInterval(interval)
-  }, [])
+    return () => clearInterval(interval);
+
+  } catch (err) {
+    console.error(err);
+    localStorage.clear();
+    window.location.href =
+      "https://www.ariyashop.in/login?redirect=admin";
+  }
+};
+
+init();
+
+}, []);
 
   const saveProducts = async (productData, actionType = 'create') => {
     try {

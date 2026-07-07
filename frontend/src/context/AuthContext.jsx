@@ -49,35 +49,57 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (email, password) => {
-    try {
-      const res = await apiClient("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ email, password })
-      });
-      const json = await res.json();
-      if (json.success && json.data) {
-        const { token, ...userData } = json.data;
-        localStorage.setItem("token", token);
-        localStorage.setItem("currentUser", JSON.stringify(userData));
-        setUser(userData);
-        toast.success("Welcome back!");
-        
-        if (userData.role === "admin") {
-          window.location.href = `https://ariya-admin.vercel.app/?token=${token}&user=${encodeURIComponent(JSON.stringify(userData))}`;
-        }
-        return true;
-      } else {
-        const errorMsg = json.errors?.[0] || json.message || "Invalid credentials";
-        toast.error(errorMsg);
-        return false;
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      toast.error("Network error during login");
+const login = async (email, password) => {
+  try {
+    const res = await apiClient("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password })
+    });
+
+    const json = await res.json();
+
+    if (!json.success || !json.data) {
+      const errorMsg =
+        json.errors?.[0] || json.message || "Invalid credentials";
+      toast.error(errorMsg);
       return false;
     }
-  };
+
+    const { token, ...userData } = json.data;
+
+    localStorage.setItem("token", token);
+    localStorage.setItem("currentUser", JSON.stringify(userData));
+    setUser(userData);
+
+    toast.success("Welcome back!");
+
+    // Check whether this login came from the admin app
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get("redirect");
+
+    if (redirect === "admin") {
+
+      if (userData.role !== "admin") {
+        toast.error("You are not authorized to access the admin panel.");
+        return "user";
+      }
+
+      window.location.href =
+        `https://ariya-admin.vercel.app/?token=${token}&user=${encodeURIComponent(
+          JSON.stringify(userData)
+        )}`;
+
+      return "admin";
+    }
+
+    return userData.role === "admin" ? "admin" : "user";
+
+  } catch (err) {
+    console.error(err);
+    toast.error("Network error during login");
+    return false;
+  }
+};
 
   const logout = () => {
     localStorage.removeItem("currentUser");

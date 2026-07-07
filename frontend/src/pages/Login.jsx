@@ -20,13 +20,11 @@ const Login = () => {
 const handleSubmit = async (e) => {
   e.preventDefault();
 
-  const result = await login(formData.email, formData.password);
+ const result = await login(formData.email, formData.password);
 
-  if (result === "admin") {
-    navigate("/admin");
-  } else if (result === "user") {
-    navigate("/");
-  }
+if (result === "user" || result === "admin") {
+  navigate("/");
+}
 };
 
   return (

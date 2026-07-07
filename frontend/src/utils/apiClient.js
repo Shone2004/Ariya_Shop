@@ -19,15 +19,17 @@ export const apiClient = async (endpoint, options = {}) => {
 
     // Handle unauthorized/expired token
     if (response.status === 401) {
-      console.warn("Unauthorized request or token expired. Clearing session...");
-      localStorage.removeItem("currentUser");
-      localStorage.removeItem("token");
-      
-      // If we are in the admin dashboard (port 5174), redirect to storefront login
-      if (window.location.port === "5174") {
-        window.location.href = "https://ariya-shop.vercel/?login=true";
-      }
-    }
+  console.warn("Unauthorized request or token expired.");
+
+  localStorage.removeItem("token");
+  localStorage.removeItem("currentUser");
+
+  // If running on the admin site, redirect to frontend login
+  if (window.location.hostname === "ariya-admin.vercel.app") {
+    window.location.href =
+      "https://www.ariyashop.in/login?redirect=admin";
+  }
+}
 
     return response;
   } catch (error) {
