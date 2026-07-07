@@ -16,6 +16,36 @@ function App() {
     setTimeout(() => setToast(''), 2600)
   }
 
+  const fetchLiveInventory = async () => {
+  try {
+    const response = await apiClient("/products");
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch products");
+    }
+
+    setProducts(data);
+  } catch (error) {
+    console.error("Failed to fetch live inventory:", error);
+  }
+};
+
+const fetchLiveOrders = async () => {
+  try {
+    const response = await apiClient("/orders");
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch orders");
+    }
+
+    setOrders(data);
+  } catch (error) {
+    console.error("Failed to fetch live orders:", error);
+  }
+};
+
 useEffect(() => {
   const params = new URLSearchParams(window.location.search);
 
