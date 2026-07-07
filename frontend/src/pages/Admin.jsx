@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react'
 import './Admin.css'
 import { useNavigate } from "react-router-dom";
-import SupportTickets from "../../../admin/src/pages/SupportTickets";
+// import SupportTickets from "../../../admin/src/pages/SupportTickets";
 
 const seedProducts = [
   { id: 1048, name: 'Celestial Diamond Ring', sku: 'AR-RNG-048', category: 'Rings', price: 249000, stock: 12, status: 'Published' },
