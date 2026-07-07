@@ -16,26 +16,6 @@ function App() {
     setTimeout(() => setToast(''), 2600)
   }
 
-  const fetchLiveInventory = async () => {
-  try {
-    const response = await apiClient("/products");
-    const data = await response.json();
-    setProducts(Array.isArray(data) ? data : []);
-  } catch (err) {
-    console.error("Could not fetch active inventory listings", err);
-  }
-};
-
-const fetchLiveOrders = async () => {
-  try {
-    const response = await apiClient("/orders");
-    const data = await response.json();
-    setOrders(Array.isArray(data) ? data : []);
-  } catch (err) {
-    console.error("Could not fetch active orders list", err);
-  }
-};
-
 useEffect(() => {
   const params = new URLSearchParams(window.location.search);
 
@@ -49,9 +29,9 @@ useEffect(() => {
       localStorage.setItem("currentUser", decodeURIComponent(urlUser));
     }
 
-   window.history.replaceState({}, "", window.location.pathname);
+    window.history.replaceState({}, "", "/");
   }
-const init = async () => {
+
   const token = localStorage.getItem("token");
 
   if (!token) {
@@ -60,41 +40,15 @@ const init = async () => {
     return;
   }
 
-  try {
-    const response = await apiClient("/auth/profile");
+  fetchLiveInventory();
+  fetchLiveOrders();
 
-    if (!response.ok) {
-      throw new Error("Unauthorized");
-    }
+  const interval = setInterval(() => {
+    fetchLiveInventory();
+    fetchLiveOrders();
+  }, 5000);
 
-const result = await response.json();
-
-if (!result.success || result.data.role !== "admin") {
-  localStorage.clear();
-  window.location.href =
-    "https://www.ariyashop.in/login?redirect=admin";
-  return;
-}
-
-    await fetchLiveInventory();
-    await fetchLiveOrders();
-
-    const interval = setInterval(() => {
-      fetchLiveInventory();
-      fetchLiveOrders();
-    }, 5000);
-
-    return () => clearInterval(interval);
-
-  } catch (err) {
-    console.error(err);
-    localStorage.clear();
-    window.location.href =
-      "https://www.ariyashop.in/login?redirect=admin";
-  }
-};
-
-init();
+  return () => clearInterval(interval);
 
 }, []);
 

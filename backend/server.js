@@ -47,9 +47,9 @@ app.use(compression());
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   process.env.ADMIN_URL,
-  'https://ariya-admin.vercel.app',
-  'https://ariya-admin.vercel.app'
-].filter(origin => origin && origin.trim() !== '');
+  "https://www.ariyashop.in",
+  "https://ariya-admin.vercel.app",
+].filter(origin => origin && origin.trim() !== "");
 
 app.use(cors({
   origin: (origin, callback) => {

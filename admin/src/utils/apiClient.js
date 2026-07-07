@@ -19,11 +19,14 @@ export const apiClient = async (endpoint, options = {}) => {
 
     // Handle unauthorized/expired token
     if (response.status === 401) {
-      console.warn("Unauthorized request or token expired. Redirecting to store login...");
-      localStorage.removeItem("currentUser");
-      localStorage.removeItem("token");
-      window.location.href = "http://localhost:5173/?login=true";
-    }
+  console.warn("Unauthorized request or token expired.");
+
+  localStorage.removeItem("currentUser");
+  localStorage.removeItem("token");
+
+  window.location.href =
+    "https://www.ariyashop.in/login?redirect=admin";
+}
 
     return response;
   } catch (error) {

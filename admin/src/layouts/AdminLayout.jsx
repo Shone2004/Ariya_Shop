@@ -5,13 +5,14 @@ function AdminLayout({ page, setPage, orders, children, overlay }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Clear admin login data
-    localStorage.removeItem("token");
-    localStorage.removeItem("currentUser");
+  // Clear admin session
+  localStorage.removeItem("token");
+  localStorage.removeItem("currentUser");
 
-    // Redirect to customer website
-    window.location.href = "https://ariya-shop.vercel";
-  };
+  // Redirect to frontend login page
+  window.location.href =
+    "https://www.ariyashop.in/login?redirect=admin";
+};
 
   return (
     <div className="app">
