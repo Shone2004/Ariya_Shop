@@ -851,62 +851,86 @@
   }
 }
 @media (max-width: 650px) {
-  #admin-root aside {
-    position: fixed;
-    inset: auto 0 0;
-    width: auto;
-    height: 65px;
-    padding: 7px;
-    display: flex;
-    overflow: auto;
+
+  #admin-root aside{
+    width:76px;
+    inset:0 auto 0 0;
+    height:100vh;
+    padding:20px 8px;
+    overflow:hidden;
   }
-  #admin-root .brand,
-  #admin-root .admin {
-    display: none;
+
+  #admin-root .brand div,
+  #admin-root .admin span{
+    display:none;
   }
-  #admin-root nav {
-    display: flex;
+
+  #admin-root .brand{
+    justify-content:center;
+    padding:0 0 25px;
   }
-  #admin-root nav button,
-  #admin-root nav button:not(.active) {
-    font-size: 0;
-    width: 46px;
-    padding: 8px;
-    justify-content: center;
+
+  #admin-root nav{
+    display:grid;
+    gap:5px;
   }
-  #admin-root main {
-    margin: 0 0 65px;
+
+  #admin-root nav button{
+    justify-content:center;
+    font-size:0;
+    padding:12px;
   }
-  #admin-root header {
-    padding: 0 18px;
+
+  #admin-root nav i{
+    font-size:18px;
+    margin:0;
   }
-  #admin-root .content {
-    padding: 20px 14px;
+
+  #admin-root .admin{
+    left:8px;
+    right:8px;
+    justify-content:center;
   }
-  #admin-root .stats,
-  #admin-root .order-summary {
-    grid-template-columns: 1fr 1fr;
+
+  #admin-root main{
+    margin-left:76px;
+    margin-bottom:0;
   }
-  #admin-root .intro,
-  #admin-root .page-head {
-    align-items: start;
-    gap: 15px;
+
+  #admin-root header{
+    padding:0 15px;
   }
-  #admin-root .intro h2,
-  #admin-root .page-head h2 {
-    font-size: 32px;
+
+  #admin-root .content{
+    padding:15px;
   }
-  #admin-root .toolbar {
-    flex-wrap: wrap;
+
+  #admin-root .stats{
+    grid-template-columns:1fr;
   }
-  #admin-root .search {
-    max-width: none;
-    width: 100%;
+
+  #admin-root .dashboard-grid{
+    grid-template-columns:1fr;
   }
-  #admin-root .form-grid {
-    grid-template-columns: 1fr;
+
+  #admin-root .order-summary{
+    grid-template-columns:1fr 1fr;
   }
-  #admin-root .wide {
-    grid-column: auto;
+
+  #admin-root .toolbar{
+    flex-wrap:wrap;
+  }
+
+  #admin-root .search{
+    width:100%;
+    max-width:none;
+  }
+
+  #admin-root .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  #admin-root table{
+    min-width:650px;
   }
 }

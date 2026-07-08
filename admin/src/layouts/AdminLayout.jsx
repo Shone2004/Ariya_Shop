@@ -1,45 +1,68 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { navigationItems, navigationSymbols } from "../constants/navigation.js";
 
 function AdminLayout({ page, setPage, orders, children, overlay }) {
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => {
-  // Clear admin session
-  localStorage.removeItem("token");
-  localStorage.removeItem("currentUser");
+    localStorage.removeItem("token");
+    localStorage.removeItem("currentUser");
 
-  // Redirect to frontend login page
-  window.location.href =
-    "https://www.ariyashop.in/login?redirect=admin";
-};
+    window.location.href =
+      "https://www.ariyashop.in/login?redirect=admin";
+  };
 
   return (
     <div className="app">
-      <aside>
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div
+          className="sidebar-overlay"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+   <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
+    {sidebarOpen && (
+  <button
+    className="close-btn"
+    onClick={() => setSidebarOpen(false)}
+  >
+    ✕
+  </button>
+)}
         <div className="brand">
           <span>A</span>
+
           <div>
             <b>ARIYA</b>
             <small>FINE JEWELLERY</small>
           </div>
         </div>
 
-        <nav style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+        <nav>
           {navigationItems.map((item) => (
             <button
               key={item}
-              onClick={() => setPage(item)}
+              onClick={() => {
+                setPage(item);
+                setSidebarOpen(false);
+              }}
               className={page === item ? "active" : ""}
             >
               <i>{navigationSymbols[item]}</i>
-              {item}
+
+              <span>{item}</span>
 
               {item === "Orders" && orders && (
                 <em>
                   {
                     orders.filter(
-                      (o) => !["Delivered", "Cancelled"].includes(o.status)
+                      (o) =>
+                        !["Delivered", "Cancelled"].includes(o.status)
                     ).length
                   }
                 </em>
@@ -47,27 +70,20 @@ function AdminLayout({ page, setPage, orders, children, overlay }) {
             </button>
           ))}
 
-          <div
-            style={{
-              height: "1px",
-              background: "#eee",
-              margin: "8px 0",
-            }}
-          />
+          <div className="divider" />
 
           <button
             onClick={handleLogout}
-            style={{
-              color: "#e05252",
-              cursor: "pointer",
-            }}
+            className="logout-btn"
           >
-            <i>↩</i> Logout
+            <i>↩</i>
+            <span>Logout</span>
           </button>
         </nav>
 
         <div className="admin">
           <div>AK</div>
+
           <span>
             <b>Aisha Kapoor</b>
             <small>Store owner</small>
@@ -75,16 +91,28 @@ function AdminLayout({ page, setPage, orders, children, overlay }) {
         </div>
       </aside>
 
+      {/* Main */}
       <main>
         <header>
-          <div>
-            <small>ARIYA / ADMIN</small>
-            <h1>{page}</h1>
+          <div className="header-left">
+            <button
+  className="menu-btn"
+  onClick={() => setSidebarOpen(true)}
+  aria-label="Open menu"
+>
+  ☰
+</button>
+
+            <div>
+              <small>ARIYA / ADMIN</small>
+              <h1>{page}</h1>
+            </div>
           </div>
 
           <div className="header-actions">
             <label>
-              ⌕ <input placeholder="Search anything…" />
+              ⌕
+              <input placeholder="Search anything…" />
             </label>
 
             <button className="icon">♢</button>
