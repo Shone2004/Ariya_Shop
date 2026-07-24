@@ -43,13 +43,13 @@ const Shop = () => {
   const { setIsCartOpen } = useContext(ShopContext);
   const navigate = useNavigate();
 
-  const handleAddToCart = (product) => {
-    addToCart(product);
+  const handleAddToCart = (product, quantity = 1, selectedSize = null) => {
+    addToCart(product, quantity, selectedSize);
     setIsCartOpen(true);
   };
 
-  const handleBuyNow = (product) => {
-    addToCart(product);
+  const handleBuyNow = (product, quantity = 1, selectedSize = null) => {
+    addToCart(product, quantity, selectedSize);
     navigate("/cart");
   };
 

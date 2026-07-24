@@ -79,6 +79,7 @@ const mapOrder = (o) => {
       name: item.name,
       quantity: item.quantity,
       price: item.price,
+      selectedSize: item.selectedSize || null,
     })) || [],
     total: obj.totalPrice,
     payment: obj.isPaid ? "Paid" : "Pending",
@@ -115,13 +116,49 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ message: 'No order items' });
     }
 
+    // Fetch the user's database cart to derive selectedSize securely
+    const cart = await Cart.findOne({ user: req.user._id });
+    const cartItems = cart ? cart.items : [];
+    const matchedCartItemIds = new Set();
+
     // Validate stock availability and pricing against database before creating order
     let calculatedItemsPrice = 0;
+    const verifiedOrderItems = [];
+
     for (const item of orderItems) {
       const product = await Product.findById(item.productId);
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
+
+      // Match with database cart items
+      const cartItem = cartItems.find(ci => 
+        ci.product.toString() === item.productId && 
+        !matchedCartItemIds.has(ci._id.toString())
+      );
+
+      let derivedSize = null;
+      if (cartItem) {
+        derivedSize = cartItem.selectedSize || null;
+        matchedCartItemIds.add(cartItem._id.toString());
+      } else {
+        derivedSize = item.selectedSize || null;
+      }
+
+      // Backend size validation
+      const hasSizes = product.sizes && product.sizes.length > 0;
+      if (hasSizes) {
+        if (!derivedSize) {
+          return res.status(400).json({ message: 'Please select a size' });
+        }
+        const sizeObj = product.sizes.find(s => s.value === derivedSize);
+        if (!sizeObj || !sizeObj.available) {
+          return res.status(400).json({ message: 'Invalid size selected' });
+        }
+      } else {
+        derivedSize = null;
+      }
+
       if (product.stockCount < item.quantity) {
         return res.status(400).json({
           message: `Only ${product.stockCount} units of ${product.name} are available.`
@@ -134,6 +171,16 @@ const createOrder = async (req, res) => {
           message: `Price mismatch for product ${product.name}.`
         });
       }
+
+      verifiedOrderItems.push({
+        productId: item.productId,
+        name: product.name,
+        price: product.price,
+        quantity: item.quantity,
+        image: item.image || product.image || "",
+        selectedSize: derivedSize
+      });
+
       calculatedItemsPrice += product.price * item.quantity;
     }
 
@@ -158,7 +205,7 @@ const createOrder = async (req, res) => {
         name: checkoutUser?.name || (shippingAddress && shippingAddress.fullName) || req.user.name,
         email: checkoutUser?.email || req.user.email
       },
-      orderItems,
+      orderItems: verifiedOrderItems,
       shippingAddress,
       paymentMethod,
       itemsPrice,
@@ -175,7 +222,7 @@ const createOrder = async (req, res) => {
       debugLog('[Order] COD order created:', createdOrder._id);
       
       // Deduct inventory atomically
-      const success = await deductInventory(orderItems);
+      const success = await deductInventory(verifiedOrderItems);
       if (!success) {
         await Order.findByIdAndDelete(createdOrder._id);
         return res.status(400).json({
@@ -197,7 +244,7 @@ const createOrder = async (req, res) => {
     if (!razorpay) {
       // For development when keys are not set, return order without Razorpay details
       // Deduct inventory atomically
-      const success = await deductInventory(orderItems);
+      const success = await deductInventory(verifiedOrderItems);
       if (!success) {
         await Order.findByIdAndDelete(createdOrder._id);
         return res.status(400).json({

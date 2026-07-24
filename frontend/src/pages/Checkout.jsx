@@ -112,17 +112,18 @@ const Checkout = () => {
       const orderRes = await apiClient("/orders/create", {
         method: "POST",
         body: JSON.stringify({
-    paymentMethod,
-    user: {
-        name: shippingAddress.fullName,
-        email: shippingAddress.email
-    },
+          paymentMethod,
+          user: {
+            name: shippingAddress.fullName,
+            email: shippingAddress.email
+          },
           orderItems: cartItems.map(item => ({
             productId: item.id || item._id,
             name: item.name,
             price: item.price,
             quantity: item.quantity,
-            image: item.image || (item.images && item.images[0]) || ""
+            image: item.image || (item.images && item.images[0]) || "",
+            selectedSize: item.selectedSize || null
           })),
           shippingAddress: {
             fullName: shippingAddress.fullName,
@@ -387,16 +388,22 @@ const Checkout = () => {
                 <div className="mb-6 rounded-lg border border-gray-200 p-4">
                   <h3 className="font-medium text-brand-dark mb-4 border-b border-gray-100 pb-2">Delivery expected within 3-5 business days</h3>
                   <ul className="divide-y divide-gray-100">
-                    {cartItems.map((item) => (
-                      <li key={item.id} className="py-4 flex items-center gap-4">
-                        <img src={item.image || item.image_url} alt={item.name} className="w-16 h-16 rounded object-cover border border-gray-100" />
-                        <div className="flex-1">
-                          <p className="text-sm font-bold text-gray-900">{item.name}</p>
-                          <p className="text-xs text-gray-500 mt-1">Qty: {item.quantity}</p>
-                        </div>
-                        <p className="text-sm font-bold text-gray-900">₹{(item.price * item.quantity).toFixed(2)}</p>
-                      </li>
-                    ))}
+                    {cartItems.map((item) => {
+                      const uniqueKey = item.id + (item.selectedSize ? '-' + item.selectedSize : '');
+                      return (
+                        <li key={uniqueKey} className="py-4 flex items-center gap-4">
+                          <img src={item.image || item.image_url} alt={item.name} className="w-16 h-16 rounded object-cover border border-gray-100" />
+                          <div className="flex-1">
+                            <p className="text-sm font-bold text-gray-900">{item.name}</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Qty: {item.quantity}
+                              {item.selectedSize ? ` | Size: ${item.selectedSize}` : ""}
+                            </p>
+                          </div>
+                          <p className="text-sm font-bold text-gray-900">₹{(item.price * item.quantity).toFixed(2)}</p>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
                 

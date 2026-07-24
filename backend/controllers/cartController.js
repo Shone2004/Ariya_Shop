@@ -36,7 +36,7 @@ const getCart = async (req, res) => {
  */
 const addToCart = async (req, res) => {
   try {
-    const { productId, quantity = 1 } = req.body;
+    const { productId, quantity = 1, selectedSize } = req.body;
 
     if (!productId) {
       return res.status(400).json({
@@ -56,19 +56,44 @@ const addToCart = async (req, res) => {
       });
     }
 
+    const hasSizes = product.sizes && product.sizes.length > 0;
+    let activeSize = null;
+
+    if (hasSizes) {
+      if (!selectedSize) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please select a size',
+          errors: ['Please select a size']
+        });
+      }
+      const sizeObj = product.sizes.find(s => s.value === selectedSize);
+      if (!sizeObj || !sizeObj.available) {
+        return res.status(400).json({
+          message: 'Invalid size selected'
+        });
+      }
+      activeSize = selectedSize;
+    }
+
     let cart = await Cart.findOne({ user: req.user._id });
     if (!cart) {
       cart = await Cart.create({ user: req.user._id, items: [] });
     }
 
-    const itemIndex = cart.items.findIndex(item => item.product.toString() === productId);
+    const itemIndex = cart.items.findIndex(item => {
+      const matchProduct = item.product.toString() === productId;
+      const sizeA = item.selectedSize || null;
+      const sizeB = activeSize || null;
+      return matchProduct && sizeA === sizeB;
+    });
 
     if (itemIndex > -1) {
       // Item already in cart, increment quantity
       cart.items[itemIndex].quantity += Number(quantity);
     } else {
       // Add new item
-      cart.items.push({ product: productId, quantity: Number(quantity) });
+      cart.items.push({ product: productId, quantity: Number(quantity), selectedSize: activeSize });
     }
 
     await cart.save();
@@ -99,7 +124,7 @@ const addToCart = async (req, res) => {
  */
 const updateCartItem = async (req, res) => {
   try {
-    const { productId, quantity } = req.body;
+    const { productId, quantity, selectedSize } = req.body;
 
     if (!productId || quantity === undefined) {
       return res.status(400).json({
@@ -118,7 +143,12 @@ const updateCartItem = async (req, res) => {
       });
     }
 
-    const itemIndex = cart.items.findIndex(item => item.product.toString() === productId);
+    const itemIndex = cart.items.findIndex(item => {
+      const matchProduct = item.product.toString() === productId;
+      const sizeA = item.selectedSize || null;
+      const sizeB = selectedSize || null;
+      return matchProduct && sizeA === sizeB;
+    });
 
     if (itemIndex > -1) {
       if (Number(quantity) <= 0) {
@@ -163,6 +193,7 @@ const updateCartItem = async (req, res) => {
 const deleteCartItem = async (req, res) => {
   try {
     const productId = req.params.id;
+    const { size } = req.query;
 
     let cart = await Cart.findOne({ user: req.user._id });
     if (!cart) {
@@ -173,7 +204,12 @@ const deleteCartItem = async (req, res) => {
       });
     }
 
-    cart.items = cart.items.filter(item => item.product.toString() !== productId);
+    cart.items = cart.items.filter(item => {
+      const matchProduct = item.product.toString() === productId;
+      const sizeA = item.selectedSize || null;
+      const sizeB = size || null;
+      return !(matchProduct && sizeA === sizeB);
+    });
     await cart.save();
 
     const updatedCart = await Cart.findOne({ user: req.user._id }).populate('items.product');

@@ -5,7 +5,8 @@ const orderItemSchema = new mongoose.Schema({
   name: { type: String, required: true },
   price: { type: Number, required: true },
   quantity: { type: Number, required: true },
-  image: { type: String }
+  image: { type: String },
+  selectedSize: { type: String, default: null }
 });
 
 const shippingAddressSchema = new mongoose.Schema({

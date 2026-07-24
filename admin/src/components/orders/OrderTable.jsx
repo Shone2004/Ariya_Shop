@@ -66,7 +66,7 @@ function OrderTable({ orders, onOpen }) {
                         }}
                       />
                       <span style={{ fontSize: '12px', color: '#4a3e3d', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '150px' }}>
-                        {p.name} <span style={{ color: '#8c8276', fontWeight: '500' }}>×{p.quantity}</span>
+                        {p.name}{p.selectedSize ? ` (${p.selectedSize})` : ""} <span style={{ color: '#8c8276', fontWeight: '500' }}>×{p.quantity}</span>
                       </span>
                     </div>
                   ))}

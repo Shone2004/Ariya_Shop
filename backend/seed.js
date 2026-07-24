@@ -371,7 +371,13 @@ const seedProducts = async () => {
         published: true,
         featured: p.isBestSeller || false,
         metaTitle: `${p.name} | Ariya Shop`,
-        metaDescription: p.description.slice(0, 150)
+        metaDescription: p.description.slice(0, 150),
+        sizes: p.category === 'Bangles' ? [
+          { value: '2.2', available: true },
+          { value: '2.4', available: true },
+          { value: '2.6', available: true },
+          { value: '2.8', available: true }
+        ] : []
       };
     });
 

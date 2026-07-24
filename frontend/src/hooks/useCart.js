@@ -20,7 +20,8 @@ export const useCart = () => {
           return {
             ...item.product,
             id: item.product._id, // map _id to id
-            quantity: item.quantity
+            quantity: item.quantity,
+            selectedSize: item.selectedSize || null
           };
         }).filter(Boolean);
         setCart(mapped);
@@ -34,13 +35,13 @@ export const useCart = () => {
     fetchBackendCart();
   }, []);
 
-  const addToCart = useCallback(async (product, quantity = 1) => {
+  const addToCart = useCallback(async (product, quantity = 1, selectedSize = null) => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
         const res = await apiClient("/cart", {
           method: "POST",
-          body: JSON.stringify({ productId: product.id || product._id, quantity })
+          body: JSON.stringify({ productId: product.id || product._id, quantity, selectedSize })
         });
         const json = await res.json();
         if (json.success && json.data) {
@@ -49,7 +50,8 @@ export const useCart = () => {
             return {
               ...item.product,
               id: item.product._id,
-              quantity: item.quantity
+              quantity: item.quantity,
+              selectedSize: item.selectedSize || null
             };
           }).filter(Boolean);
           setCart(mapped);
@@ -60,13 +62,16 @@ export const useCart = () => {
     } else {
       // Local fallback
       setCart((prev) => {
-        const existingIndex = prev.findIndex((item) => item.id === product.id);
+        const existingIndex = prev.findIndex((item) => 
+          item.id === product.id && 
+          (item.selectedSize || null) === (selectedSize || null)
+        );
         if (existingIndex > -1) {
           const updated = [...prev];
           updated[existingIndex].quantity += quantity;
           return updated;
         } else {
-          return [...prev, { ...product, quantity }];
+          return [...prev, { ...product, quantity, selectedSize: selectedSize || null }];
         }
       });
     }
@@ -82,11 +87,12 @@ export const useCart = () => {
     });
   }, [setCart]);
 
-  const removeFromCart = useCallback(async (productId, productName) => {
+  const removeFromCart = useCallback(async (productId, productName, selectedSize = null) => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
-        const res = await apiClient(`/cart/${productId}`, {
+        const sizeParam = selectedSize ? `?size=${encodeURIComponent(selectedSize)}` : '';
+        const res = await apiClient(`/cart/${productId}${sizeParam}`, {
           method: "DELETE"
         });
         const json = await res.json();
@@ -96,7 +102,8 @@ export const useCart = () => {
             return {
               ...item.product,
               id: item.product._id,
-              quantity: item.quantity
+              quantity: item.quantity,
+              selectedSize: item.selectedSize || null
             };
           }).filter(Boolean);
           setCart(mapped);
@@ -105,7 +112,9 @@ export const useCart = () => {
         console.error("Error removing from database cart:", err);
       }
     } else {
-      setCart((prev) => prev.filter((item) => item.id !== productId));
+      setCart((prev) => prev.filter((item) => 
+        !(item.id === productId && (item.selectedSize || null) === (selectedSize || null))
+      ));
     }
 
     if (productName) {
@@ -120,9 +129,9 @@ export const useCart = () => {
     }
   }, [setCart]);
 
-  const updateQuantity = useCallback(async (productId, quantity) => {
+  const updateQuantity = useCallback(async (productId, quantity, selectedSize = null) => {
     if (quantity <= 0) {
-      removeFromCart(productId);
+      removeFromCart(productId, null, selectedSize);
       return;
     }
 
@@ -131,7 +140,7 @@ export const useCart = () => {
       try {
         const res = await apiClient("/cart", {
           method: "PUT",
-          body: JSON.stringify({ productId, quantity })
+          body: JSON.stringify({ productId, quantity, selectedSize })
         });
         const json = await res.json();
         if (json.success && json.data) {
@@ -140,7 +149,8 @@ export const useCart = () => {
             return {
               ...item.product,
               id: item.product._id,
-              quantity: item.quantity
+              quantity: item.quantity,
+              selectedSize: item.selectedSize || null
             };
           }).filter(Boolean);
           setCart(mapped);
@@ -150,7 +160,11 @@ export const useCart = () => {
       }
     } else {
       setCart((prev) =>
-        prev.map((item) => (item.id === productId ? { ...item, quantity } : item))
+        prev.map((item) => 
+          item.id === productId && (item.selectedSize || null) === (selectedSize || null)
+            ? { ...item, quantity }
+            : item
+        )
       );
     }
   }, [setCart, removeFromCart]);

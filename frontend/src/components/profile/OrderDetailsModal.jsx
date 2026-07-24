@@ -162,7 +162,10 @@ const OrderDetailsModal = ({ selectedOrder, onClose }) => {
                     )}
                     <div>
                       <p className="font-medium text-gray-900 text-sm">{product.name}</p>
-                      <p className="text-xs text-gray-500 mt-1">Quantity: {product.quantity}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Quantity: {product.quantity}
+                        {product.selectedSize ? ` | Size: ${product.selectedSize}` : ""}
+                      </p>
                     </div>
                   </div>
                   <p className="font-semibold text-brand-dark text-sm">

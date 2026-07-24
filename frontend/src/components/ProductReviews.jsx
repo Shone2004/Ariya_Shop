@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
+import toast from 'react-hot-toast'
+import { useCart } from '../hooks/useCart'
+import SizeSelector from './Product/SizeSelector'
 
 /* ─── Icons ─── */
 const StarIcon = ({ size = 16, filled = true, stroke = '#C9A54B' }) => (
@@ -259,6 +262,28 @@ const ProductReviews = ({ product }) => {
   const [visibleCount, setVisibleCount] = useState(3)
   const [form, setForm] = useState({ name: '', email: '', title: '', body: '', rating: 0, photo: null })
   const [submitStatus, setSubmitStatus] = useState('idle')
+  const [selectedSize, setSelectedSize] = useState(null)
+  const { addToCart } = useCart()
+
+  const handleAddToCart = () => {
+    const hasSizes = product?.sizes && product?.sizes.length > 0;
+    if (hasSizes && !selectedSize) {
+      toast.error("Please select a size", {
+        style: {
+          background: "#2E241C",
+          color: "#FCF9F5",
+          fontFamily: "Outfit, sans-serif",
+          borderRadius: "8px",
+        },
+      });
+      const el = document.getElementById("product-size-selector");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      return;
+    }
+    addToCart(product, 1, selectedSize);
+  };
 
   const RATING_SUMMARY = useMemo(() => {
     const total = product?.reviewsCount || 156;
@@ -370,11 +395,25 @@ const ProductReviews = ({ product }) => {
               <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-[#C9A54B]/20" />
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#C9A54B]">Customer Reviews</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#C9A54B]">Product Details</p>
               <h1 className="mt-3 max-w-md font-serif text-3xl leading-tight text-[#f8f0e3] sm:text-4xl">
                 {product?.name || "Product"}
               </h1>
-              <p className="mt-2 text-sm font-medium text-[#C9A54B]">{formatPrice(product?.price || 12450)}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-4">
+                <span className="text-sm font-medium text-[#C9A54B]">{formatPrice(product?.price || 12450)}</span>
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  className="bg-[#C9A54B] hover:bg-[#B08F3E] text-white px-5 py-2 rounded-full text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer"
+                >
+                  Add to Cart
+                </button>
+              </div>
+              <SizeSelector
+                sizes={product?.sizes}
+                selectedSize={selectedSize}
+                onSelect={setSelectedSize}
+              />
             </div>
           </motion.div>
 

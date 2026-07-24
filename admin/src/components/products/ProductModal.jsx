@@ -20,7 +20,8 @@ function ProductModal({ product, onClose, onSubmit }) {
         lowStockAlert: product.lowStockAlert || 5,
         originalPrice: product.originalPrice || product.price || 0,
         collection: product.collection || 'Heritage',
-        description: product.description || product.shortDescription || ''
+        description: product.description || product.shortDescription || '',
+        sizes: product.sizes || [],
       };
     }
     return {
@@ -46,7 +47,8 @@ function ProductModal({ product, onClose, onSubmit }) {
       published: true,
       featured: false,
       metaTitle: '',
-      metaDescription: ''
+      metaDescription: '',
+      sizes: [],
     };
   };
 
@@ -68,6 +70,33 @@ function ProductModal({ product, onClose, onSubmit }) {
     const list = form.occasion || [];
     const next = list.includes(occ) ? list.filter(x => x !== occ) : [...list, occ];
     setForm({ ...form, occasion: next });
+  };
+
+  const handleAddSize = () => {
+    const input = document.getElementById('newSizeInput');
+    if (!input) return;
+    const value = input.value.trim();
+    if (!value) return;
+
+    const exists = form.sizes?.some(s => s.value.trim().toLowerCase() === value.toLowerCase());
+    if (exists) {
+      alert('Size already exists');
+      return;
+    }
+
+    const nextSizes = [...(form.sizes || []), { value: value.trim(), available: true }];
+    setForm({ ...form, sizes: nextSizes });
+    input.value = '';
+  };
+
+  const handleToggleSizeAvailability = (index) => {
+    const nextSizes = (form.sizes || []).map((s, i) => i === index ? { ...s, available: !s.available } : s);
+    setForm({ ...form, sizes: nextSizes });
+  };
+
+  const handleRemoveSize = (index) => {
+    const nextSizes = (form.sizes || []).filter((_, i) => i !== index);
+    setForm({ ...form, sizes: nextSizes });
   };
 
   const removeGalleryImage = index => {
@@ -159,10 +188,21 @@ function ProductModal({ product, onClose, onSubmit }) {
       setSubmitError('Main Image is required. Please upload an image or enter a URL.');
       return;
     }
+
+    // Automatically sort sizes numerically before saving (2.2 -> 2.4 -> 2.6 -> 2.8)
+    const sortedSizes = form.sizes ? [...form.sizes].sort((a, b) => {
+      const numA = parseFloat(a.value);
+      const numB = parseFloat(b.value);
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return numA - numB;
+      }
+      return String(a.value).localeCompare(String(b.value), undefined, { numeric: true });
+    }) : [];
     
     // Auto-map/sanitize for submissions
     const payload = {
       ...form,
+      sizes: sortedSizes,
       price: Number(form.price),
       originalPrice: Number(form.originalPrice || form.price),
       stockCount: Number(form.stockCount),
@@ -310,6 +350,75 @@ function ProductModal({ product, onClose, onSubmit }) {
               <label>Original Price (₹)<input type="number" min="0" name="originalPrice" value={form.originalPrice} onChange={update} /></label>
               <label>Stock quantity<input required type="number" min="0" name="stockCount" value={form.stockCount} onChange={update} /></label>
               <label>Low stock alert threshold<input type="number" min="0" name="lowStockAlert" value={form.lowStockAlert} onChange={update} /></label>
+            </div>
+          </fieldset>
+
+          {/* Sizes fieldset */}
+          <fieldset style={{ border: '1px solid #ece7df', borderRadius: '10px', padding: '16px' }}>
+            <legend style={{ padding: '0 8px', fontWeight: 'bold', fontSize: '11px', color: '#b88a44', letterSpacing: '1px' }}>AVAILABLE SIZES (OPTIONAL)</legend>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', alignItems: 'center' }}>
+              <input
+                type="text"
+                id="newSizeInput"
+                placeholder="e.g. 2.2, 2.4, S, M, L"
+                style={{ padding: '8px 12px', border: '1px solid #d1c7bd', borderRadius: '6px', font: 'inherit', width: '150px' }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddSize();
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className="secondary"
+                onClick={handleAddSize}
+                style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid #2e241c', cursor: 'pointer' }}
+              >
+                Add Size
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+              {form.sizes && form.sizes.map((s, idx) => (
+                <div key={idx} style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '8px', 
+                  padding: '6px 12px', 
+                  border: '1px solid #ece7df', 
+                  borderRadius: '20px',
+                  backgroundColor: s.available ? '#fdfdfc' : '#f5f5f5',
+                  opacity: s.available ? 1 : 0.6
+                }}>
+                  <input 
+                    type="checkbox" 
+                    checked={s.available} 
+                    onChange={() => handleToggleSizeAvailability(idx)}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: '13px', fontWeight: '500', color: '#2e241c' }}>{s.value}</span>
+                  <button 
+                    type="button" 
+                    onClick={() => handleRemoveSize(idx)} 
+                    style={{ 
+                      background: 'none', 
+                      border: 'none', 
+                      color: '#8c8276', 
+                      cursor: 'pointer', 
+                      fontSize: '14px', 
+                      padding: '0 4px',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              {(!form.sizes || form.sizes.length === 0) && (
+                <span style={{ fontSize: '12px', color: '#8c8276', fontStyle: 'italic' }}>No sizes added. This product will not require size selection.</span>
+              )}
             </div>
           </fieldset>
 

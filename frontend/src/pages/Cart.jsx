@@ -43,94 +43,99 @@ const Cart = () => {
               </div>
 
               <ul className="divide-y divide-gray-200">
-                {cartItems.map((item) => (
-                  <li key={item.id} className="p-6">
-                    <div className="flex flex-col sm:grid sm:grid-cols-5 sm:items-center sm:gap-6">
-                      {/* Product Image & Details */}
-                      <div className="col-span-2 flex items-center gap-4">
-                        <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-                          <img
-                            src={item.image || item.image_url}
-                            alt={item.name}
-                            className="h-full w-full object-cover object-center"
-                          />
+                {cartItems.map((item) => {
+                  const uniqueKey = item.id + (item.selectedSize ? '-' + item.selectedSize : '');
+                  return (
+                    <li key={uniqueKey} className="p-6">
+                      <div className="flex flex-col sm:grid sm:grid-cols-5 sm:items-center sm:gap-6">
+                        {/* Product Image & Details */}
+                        <div className="col-span-2 flex items-center gap-4">
+                          <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                            <img
+                              src={item.image || item.image_url}
+                              alt={item.name}
+                              className="h-full w-full object-cover object-center"
+                            />
+                          </div>
+                          <div className="flex flex-col">
+                            <h3 className="font-serif font-medium text-brand-dark text-lg">{item.name}</h3>
+                            <p className="mt-1 text-sm text-gray-500">
+                              {item.color ? `${item.color}${item.selectedSize ? ` | Size : ${item.selectedSize}` : ''}` : (item.selectedSize ? `Size : ${item.selectedSize}` : '')}
+                            </p>
+                            {item.stockCount === 0 ? (
+                              <p className="text-xs text-red-500 font-semibold italic mt-1">Out of Stock</p>
+                            ) : item.quantity > item.stockCount ? (
+                              <p className="text-xs text-red-500 font-medium mt-1">Only {item.stockCount} units available</p>
+                            ) : null}
+                            <button 
+                              onClick={() => removeFromCart(item.id, item.name, item.selectedSize)}
+                              className="mt-2 flex items-center text-sm font-medium text-red-500 transition hover:text-red-700 sm:hidden"
+                            >
+                              <FiTrash2 className="mr-1" /> Remove
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex flex-col">
-                          <h3 className="font-serif font-medium text-brand-dark text-lg">{item.name}</h3>
-                          <p className="mt-1 text-sm text-gray-500">{item.color} | {item.size}</p>
-                          {item.stockCount === 0 ? (
-                            <p className="text-xs text-red-500 font-semibold italic mt-1">Out of Stock</p>
-                          ) : item.quantity > item.stockCount ? (
-                            <p className="text-xs text-red-500 font-medium mt-1">Only {item.stockCount} units available</p>
-                          ) : null}
-                          <button 
-                            onClick={() => removeFromCart(item.id, item.name)}
-                            className="mt-2 flex items-center text-sm font-medium text-red-500 transition hover:text-red-700 sm:hidden"
-                          >
-                            <FiTrash2 className="mr-1" /> Remove
-                          </button>
+
+                        {/* Price (Desktop) */}
+                        <div className="hidden text-center text-gray-900 sm:block">
+                          ₹{item.price}
                         </div>
-                      </div>
 
-                      {/* Price (Desktop) */}
-                      <div className="hidden text-center text-gray-900 sm:block">
-                        ₹{item.price}
-                      </div>
+                        {/* Quantity Controls */}
+                        <div className="mt-4 flex items-center justify-between sm:mt-0 sm:justify-center">
+                          <div className="flex items-center rounded-lg border border-gray-200 bg-white">
+                            <button
+                              onClick={() => updateQuantity(item.id, item.quantity - 1, item.selectedSize)}
+                              className="flex h-10 w-10 items-center justify-center text-gray-500 transition hover:bg-gray-50 hover:text-primary"
+                            >
+                              <FiMinus size={14} />
+                            </button>
+                            <span className="flex h-10 w-10 items-center justify-center font-medium text-gray-900">
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() => {
+                                if (item.quantity < item.stockCount) {
+                                  updateQuantity(item.id, item.quantity + 1, item.selectedSize);
+                                } else {
+                                  toast.error(`Only ${item.stockCount} units of ${item.name} are available.`, {
+                                    style: {
+                                      background: "#2E241C",
+                                      color: "#FCF9F5",
+                                      fontFamily: "Outfit, sans-serif",
+                                      borderRadius: "8px",
+                                    }
+                                  });
+                                }
+                              }}
+                              className="flex h-10 w-10 items-center justify-center text-gray-500 transition hover:bg-gray-50 hover:text-primary"
+                            >
+                              <FiPlus size={14} />
+                            </button>
+                          </div>
+                          
+                          <div className="text-right font-medium text-gray-900 sm:hidden">
+                            ₹{(item.price * item.quantity).toFixed(2)}
+                          </div>
+                        </div>
 
-                      {/* Quantity Controls */}
-                      <div className="mt-4 flex items-center justify-between sm:mt-0 sm:justify-center">
-                        <div className="flex items-center rounded-lg border border-gray-200 bg-white">
-                          <button
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="flex h-10 w-10 items-center justify-center text-gray-500 transition hover:bg-gray-50 hover:text-primary"
-                          >
-                            <FiMinus size={14} />
-                          </button>
-                          <span className="flex h-10 w-10 items-center justify-center font-medium text-gray-900">
-                            {item.quantity}
+                        {/* Total & Remove (Desktop) */}
+                        <div className="hidden items-center justify-end gap-6 sm:flex">
+                          <span className="font-medium text-gray-900">
+                            ₹{(item.price * item.quantity).toFixed(2)}
                           </span>
-                          <button
-                            onClick={() => {
-                              if (item.quantity < item.stockCount) {
-                                updateQuantity(item.id, item.quantity + 1);
-                              } else {
-                                toast.error(`Only ${item.stockCount} units of ${item.name} are available.`, {
-                                  style: {
-                                    background: "#2E241C",
-                                    color: "#FCF9F5",
-                                    fontFamily: "Outfit, sans-serif",
-                                    borderRadius: "8px",
-                                  }
-                                });
-                              }
-                            }}
-                            className="flex h-10 w-10 items-center justify-center text-gray-500 transition hover:bg-gray-50 hover:text-primary"
+                          <button 
+                            onClick={() => removeFromCart(item.id, item.name, item.selectedSize)}
+                            className="text-gray-400 transition hover:text-red-500"
+                            title="Remove item"
                           >
-                            <FiPlus size={14} />
+                            <FiTrash2 size={20} />
                           </button>
                         </div>
-                        
-                        <div className="text-right font-medium text-gray-900 sm:hidden">
-                          ₹{(item.price * item.quantity).toFixed(2)}
-                        </div>
                       </div>
-
-                      {/* Total & Remove (Desktop) */}
-                      <div className="hidden items-center justify-end gap-6 sm:flex">
-                        <span className="font-medium text-gray-900">
-                          ₹{(item.price * item.quantity).toFixed(2)}
-                        </span>
-                        <button 
-                          onClick={() => removeFromCart(item.id, item.name)}
-                          className="text-gray-400 transition hover:text-red-500"
-                          title="Remove item"
-                        >
-                          <FiTrash2 size={20} />
-                        </button>
-                      </div>
-                    </div>
-                  </li>
-                ))}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </div>

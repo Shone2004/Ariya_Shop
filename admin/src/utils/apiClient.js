@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://ariya-shop.onrender.com/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://ariya-shop.onrender.com/api";
 
 export const apiClient = async (endpoint, options = {}) => {
   const token = localStorage.getItem("token");

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import apiClient from "../utils/apiClient";
 import { useCart } from "../hooks/useCart";
 import { ShopContext } from "../context/ShopContext";
+import toast from "react-hot-toast";
 import {
   FaStar,
   FaStarHalfAlt,
@@ -255,7 +256,7 @@ const QuickViewModal = ({ product, isOpen, onClose }) => {
   // Reset state when product changes
   useEffect(() => {
     if (product) {
-      setSelectedSize(product.sizes?.[0] || null);
+      setSelectedSize(null);
       setQuantity(1);
       setCurrentImageIndex(0);
       setAddedToCart(false);
@@ -277,9 +278,22 @@ const QuickViewModal = ({ product, isOpen, onClose }) => {
     };
   }, [isOpen, onClose]);
 
+  const hasSizes = product && product.sizes && product.sizes.length > 0;
+
   const handleAddToCart = () => {
     if (product) {
-      addToCart(product, quantity);
+      if (hasSizes && !selectedSize) {
+        toast.error("Please select a size", {
+          style: {
+            background: "#2E241C",
+            color: "#FCF9F5",
+            fontFamily: "Outfit, sans-serif",
+            borderRadius: "8px",
+          },
+        });
+        return;
+      }
+      addToCart(product, quantity, selectedSize);
       setIsCartOpen(true);
       setAddedToCart(true);
       setTimeout(() => setAddedToCart(false), 2500);
@@ -463,25 +477,39 @@ const QuickViewModal = ({ product, isOpen, onClose }) => {
                   )}
 
                   {/* Size Selector */}
-                  {product.sizes && (
+                  {product.sizes && product.sizes.length > 0 && (
                     <div className="mt-6">
                       <p className="text-xs uppercase tracking-wider font-semibold text-[#222222] mb-2.5">
                         Select Size
                       </p>
                       <div className="flex flex-wrap gap-2">
-                        {product.sizes.map((size) => (
-                          <button
-                            key={size}
-                            onClick={() => setSelectedSize(size)}
-                            className={`px-4 py-2 rounded-full text-xs font-medium border-2 transition-all duration-200 ${
-                              selectedSize === size
-                                ? "border-[#be8b2d] bg-[#be8b2d] text-white shadow-md"
-                                : "border-gray-200 text-[#222222] hover:border-[#be8b2d] hover:text-[#be8b2d]"
-                            }`}
-                          >
-                            {size}
-                          </button>
-                        ))}
+                        {product.sizes.map((sizeObj) => {
+                          const val = typeof sizeObj === 'object' ? sizeObj.value : sizeObj;
+                          const available = typeof sizeObj === 'object' ? sizeObj.available : true;
+                          const isSelected = selectedSize === val;
+
+                          return (
+                            <button
+                              key={val}
+                              type="button"
+                              disabled={!available}
+                              onClick={() => available && setSelectedSize(val)}
+                              className={`px-4 py-2 rounded-full text-xs font-medium border-2 transition-all duration-200 ${
+                                isSelected
+                                  ? "border-[#be8b2d] bg-[#be8b2d] text-white shadow-md"
+                                  : !available
+                                  ? "border-gray-100 text-gray-300 cursor-not-allowed"
+                                  : "border-gray-200 text-[#222222] hover:border-[#be8b2d] hover:text-[#be8b2d]"
+                              }`}
+                              style={{
+                                opacity: !available ? 0.5 : 1,
+                                cursor: !available ? "not-allowed" : "pointer"
+                              }}
+                            >
+                              {val}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   )}

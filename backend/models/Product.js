@@ -115,7 +115,13 @@ const productSchema = new mongoose.Schema({
   metaDescription: {
     type: String,
     trim: true
-  }
+  },
+  sizes: [
+    {
+      value: { type: String, trim: true, required: true },
+      available: { type: Boolean, default: true }
+    }
+  ]
 }, {
   timestamps: true
 });

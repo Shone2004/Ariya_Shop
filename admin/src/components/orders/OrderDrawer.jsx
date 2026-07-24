@@ -62,6 +62,7 @@ function OrderDrawer({ order, close, update }) {
                   <b style={{ fontSize: '13px', color: '#2e241c' }}>{item.name}</b>
                   <span style={{ fontSize: '11px', color: '#8c8276' }}>
                     {itemQuantity} × {formatMoney(itemPrice)}
+                    {item.selectedSize ? ` | Size: ${item.selectedSize}` : ""}
                   </span>
                 </div>
                 <b style={{ fontSize: '13px', color: '#2e241c' }}>{formatMoney(subtotal)}</b>

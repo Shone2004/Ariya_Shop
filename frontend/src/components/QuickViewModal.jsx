@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { FiX, FiShoppingBag, FiHeart, FiPlus, FiMinus } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
+import SizeSelector from "./Product/SizeSelector";
 
 const QuickViewModal = ({
   product,
@@ -13,8 +15,11 @@ const QuickViewModal = ({
 }) => {
   const [quantity, setQuantity] = useState(1);
   const [currentImage, setCurrentImage] = useState(0);
+  const [selectedSize, setSelectedSize] = useState(null);
+  
   useEffect(() => {
     setCurrentImage(0);
+    setSelectedSize(null);
     if (product) {
       setQuantity(product.stockCount > 0 ? 1 : 0);
     }
@@ -87,6 +92,10 @@ console.log("IMAGE:", image);
 console.log("IMAGES:", images);
 console.log("GALLERY:", galleryImages);
 console.log("COUNT:", galleryImages.length);
+  const hasSizes = product.sizes && product.sizes.length > 0;
+  const allSizesUnavailable = hasSizes && product.sizes.every(s => !s.available);
+  const isOutOfStock = stockCount === 0 || allSizesUnavailable;
+
   const discountPercentage = originalPrice
     ? Math.round(((originalPrice - price) / originalPrice) * 100)
     : 0;
@@ -242,13 +251,20 @@ console.log("COUNT:", galleryImages.length);
                   <span className="text-luxury-brown font-medium">3–5 Days</span>
                 </div>
               </div>
+
+              {/* Size Selector Integration */}
+              <SizeSelector
+                sizes={product.sizes}
+                selectedSize={selectedSize}
+                onSelect={setSelectedSize}
+              />
             </div>
 
             {/* Actions */}
             <div>
               {/* Stock Alerts */}
               <div className="mb-4 text-xs">
-                {stockCount === 0 ? (
+                {isOutOfStock ? (
                   <div className="flex items-center gap-2 text-[#EF4444] font-semibold italic">
                     Out of Stock
                   </div>
@@ -269,8 +285,8 @@ console.log("COUNT:", galleryImages.length);
                 {/* Quantity Selector */}
                 <div className="flex items-center justify-between border border-luxury-beige-dark rounded-md w-full sm:w-32 h-12">
                   <button
-                    onClick={() => setQuantity((q) => Math.max(stockCount > 0 ? 1 : 0, q - 1))}
-                    disabled={stockCount === 0}
+                    onClick={() => setQuantity((q) => Math.max(isOutOfStock ? 0 : 1, q - 1))}
+                    disabled={isOutOfStock}
                     className="p-3 text-luxury-brown hover:bg-luxury-beige transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Decrease quantity"
                   >
@@ -279,7 +295,7 @@ console.log("COUNT:", galleryImages.length);
                   <span className="font-medium text-sm text-luxury-brown">{quantity}</span>
                   <button
                     onClick={() => setQuantity((q) => Math.min(stockCount, q + 1))}
-                    disabled={stockCount === 0}
+                    disabled={isOutOfStock}
                     className="p-3 text-luxury-brown hover:bg-luxury-beige transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Increase quantity"
                   >
@@ -290,20 +306,34 @@ console.log("COUNT:", galleryImages.length);
                 {/* Add to Cart */}
                 <button
                   onClick={() => {
-                    if (stockCount > 0) {
-                      onAddToCart(product, quantity);
-                      onClose();
+                    if (isOutOfStock) return;
+                    if (hasSizes && !selectedSize) {
+                      toast.error("Please select a size", {
+                        style: {
+                          background: "#2E241C",
+                          color: "#FCF9F5",
+                          fontFamily: "Outfit, sans-serif",
+                          borderRadius: "8px",
+                        },
+                      });
+                      const sizeSelectorEl = document.getElementById("product-size-selector");
+                      if (sizeSelectorEl) {
+                        sizeSelectorEl.scrollIntoView({ behavior: "smooth", block: "center" });
+                      }
+                      return;
                     }
+                    onAddToCart(product, quantity, selectedSize);
+                    onClose();
                   }}
-                  disabled={stockCount === 0}
+                  disabled={isOutOfStock}
                   className={`flex-grow h-12 text-white text-xs tracking-widest uppercase font-medium rounded-md shadow-md transition-colors flex items-center justify-center gap-2 ${
-                    stockCount === 0
+                    isOutOfStock
                       ? "bg-gray-400 cursor-not-allowed opacity-65"
                       : "bg-[#2E241C] hover:bg-[#423429]"
                   }`}
                 >
                   <FiShoppingBag className="w-4 h-4" />
-                  {stockCount === 0 ? "Out of Stock" : "Add to Cart"}
+                  {isOutOfStock ? "Out of Stock" : "Add to Cart"}
                 </button>
 
                 {/* Wishlist Icon Button */}
