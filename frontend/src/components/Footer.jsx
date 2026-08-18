@@ -68,7 +68,7 @@ const Footer = () => {
   ];
 
   const trustBadges = [
-    { icon: FaTruck, title: "Free Shipping", desc: "Orders above ₹999" },
+    { icon: FaTruck, title: "₹99 Shipping", desc: "Orders above ₹999" },
     { icon: FaUndo, title: "Easy Returns", desc: "7-day return policy" },
     { icon: FaShieldAlt, title: "Certified Jewelry", desc: "Quality assured" },
     { icon: FaLock, title: "Secure Payment", desc: "100% encrypted" },

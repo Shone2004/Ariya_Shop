@@ -434,7 +434,7 @@ const Checkout = () => {
               <div className="flex items-center justify-between">
                 <dt>Delivery</dt>
                 <dd className="font-medium text-gray-900">
-                  {shipping === 0 ? "Free" : `₹${shipping.toFixed(2)}`}
+                  {shipping === 0 ? "99" : `₹${shipping.toFixed(2)}`}
                 </dd>
               </div>
               <div className="border-t border-gray-200 pt-4 flex items-center justify-between text-xl font-bold text-brand-dark">

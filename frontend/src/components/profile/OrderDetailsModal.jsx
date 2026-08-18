@@ -247,7 +247,7 @@ const OrderDetailsModal = ({ selectedOrder, onClose }) => {
             </div>
             <div className="flex justify-between text-gray-500">
               <span>Shipping</span>
-              <span>{selectedOrder.shippingPrice > 0 ? `₹${selectedOrder.shippingPrice.toLocaleString("en-IN")}` : "Free"}</span>
+              <span>{selectedOrder.shippingPrice > 0 ? `₹${selectedOrder.shippingPrice.toLocaleString("en-IN")}` : "₹99"}</span>
             </div>
             <div className="flex justify-between text-gray-500">
               <span>Tax</span>

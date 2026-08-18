@@ -8,7 +8,7 @@ const Cart = () => {
   const { cart: cartItems, updateQuantity, removeFromCart } = useCart();
 
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-  const shipping = 0;
+  const shipping = 99;
   const total = subtotal + shipping;
   const hasOutOfStockItems = cartItems.some(item => item.stockCount === 0 || item.quantity > item.stockCount);
 
@@ -165,7 +165,7 @@ const Cart = () => {
                 <div className="flex items-center justify-between">
                   <dt>Shipping</dt>
                   <dd className="font-medium text-gray-900">
-                    {shipping === 0 ? "Free" : `₹${shipping.toFixed(2)}`}
+                    {shipping === 0 ? "₹99" : `₹${shipping.toFixed(2)}`}
                   </dd>
                 </div>
                 <div className="border-t border-gray-200 pt-4 flex items-center justify-between text-base font-medium">

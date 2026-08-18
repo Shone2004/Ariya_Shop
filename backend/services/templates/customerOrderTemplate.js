@@ -58,7 +58,7 @@ const customerOrderTemplate = (order) => {
     .join('');
 
   const itemsPrice   = formatMoney(order.itemsPrice   || 0);
-  const shippingPrice = order.shippingPrice > 0 ? formatMoney(order.shippingPrice) : 'Free';
+  const shippingPrice = order.shippingPrice > 0 ? formatMoney(order.shippingPrice) : '₹99';
   const taxPrice     = order.taxPrice > 0 ? formatMoney(order.taxPrice) : '₹0.00';
   const totalPrice   = formatMoney(order.totalPrice   || 0);
 

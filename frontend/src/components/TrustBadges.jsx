@@ -3,7 +3,7 @@ import React from "react";
 const BADGES = [
   {
     id: "shipping",
-    title: "FREE SHIPPING",
+    title: "₹99 SHIPPING",
     subtitle: "Across India",
     icon: (
       <svg viewBox="0 0 64 64" className="w-8 h-8 text-luxury-gold fill-none stroke-current stroke-[1.1]">

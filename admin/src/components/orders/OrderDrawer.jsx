@@ -80,7 +80,7 @@ function OrderDrawer({ order, close, update }) {
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: '#8c8276' }}>Shipping</span>
-            <span>{order.shippingPrice ? formatMoney(order.shippingPrice) : 'Free'}</span>
+            <span>{order.shippingPrice ? formatMoney(order.shippingPrice) : '₹99'}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: '#8c8276' }}>Tax</span>

@@ -589,7 +589,7 @@ background: MOBILE_OVERLAYS[currentSlide]
                       <circle cx="6" cy="18" r="2" />
                       <circle cx="17" cy="18" r="2" />
                     </svg>
-                    <span className="truncate">Free Shipping</span>
+                    <span className="truncate">₹99 Shipping</span>
                   </div>
                 </div>
               </div>
@@ -678,7 +678,7 @@ background: MOBILE_OVERLAYS[currentSlide]
               </div>
               <div className="text-left">
                 <h4 className="text-sm tracking-widest font-bold uppercase text-[#2E241C]">
-                  Free Delivery In India
+                  ₹99 Delivery charges In India
                 </h4>
                 <p className="text-xs font-medium text-[#4A433E] tracking-wider mt-1">
                   Complimentary tracked shipping.
