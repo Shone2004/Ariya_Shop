@@ -1,15 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { FiTrash2, FiMinus, FiPlus, FiShoppingBag, FiArrowRight } from "react-icons/fi";
+import { FiTrash2, FiMinus, FiPlus, FiShoppingBag, FiArrowRight, FiTag } from "react-icons/fi";
 import { useCart } from "../hooks/useCart";
 import toast from "react-hot-toast";
+import offerBrochure from "../assets/offer.jpeg";
 
 const Cart = () => {
   const { cart: cartItems, updateQuantity, removeFromCart } = useCart();
+  const [showOffer, setShowOffer] = useState(false);
+
+  // Fixed ₹99 shipping charge
+  const SHIPPING_FEE = 99;
 
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-  const shipping = 99;
-  const total = subtotal + shipping;
+  const total = subtotal + SHIPPING_FEE;
+  
   const hasOutOfStockItems = cartItems.some(item => item.stockCount === 0 || item.quantity > item.stockCount);
 
   return (
@@ -156,6 +161,37 @@ const Cart = () => {
                   Apply
                 </button>
               </div>
+
+              {/* Offer Brochure Section */}
+              <div className="mt-6 border-b border-gray-200 pb-6">
+                <button 
+                  onClick={() => setShowOffer(!showOffer)}
+                  className="flex w-full items-center justify-between rounded-md border border-amber-200 bg-amber-50/50 px-4 py-2.5 text-xs font-semibold text-amber-900 transition hover:bg-amber-100/50"
+                >
+                  <span className="flex items-center gap-2">
+                    <FiTag className="text-amber-700" />
+                    Special Offer Brochure
+                  </span>
+                  <span>{showOffer ? "Hide" : "View"}</span>
+                </button>
+
+                {showOffer && (
+                  <div className="mt-3 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 p-2">
+                    <img 
+                      src={offerBrochure} 
+                      alt="Current Promotional Offer" 
+                      className="w-full rounded object-cover"
+                    />
+                    <a 
+                      href={offerBrochure} 
+                      download="offer-brochure.jpeg"
+                      className="mt-2 block text-center text-xs font-medium text-primary hover:underline"
+                    >
+                      Download Brochure
+                    </a>
+                  </div>
+                )}
+              </div>
               
               <dl className="mt-6 space-y-4 text-sm text-gray-600">
                 <div className="flex items-center justify-between">
@@ -164,9 +200,7 @@ const Cart = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <dt>Shipping</dt>
-                  <dd className="font-medium text-gray-900">
-                    {shipping === 0 ? "₹99" : `₹${shipping.toFixed(2)}`}
-                  </dd>
+                  <dd className="font-medium text-gray-900">₹{SHIPPING_FEE.toFixed(2)}</dd>
                 </div>
                 <div className="border-t border-gray-200 pt-4 flex items-center justify-between text-base font-medium">
                   <dt className="text-gray-900">Order Total</dt>
@@ -174,16 +208,10 @@ const Cart = () => {
                 </div>
               </dl>
 
-              {shipping > 0 && (
-                <p className="mt-4 text-xs text-gray-500 text-center">
-                  Add ₹{(150 - subtotal).toFixed(2)} more to your cart to get free shipping!
-                </p>
-              )}
-
               {hasOutOfStockItems ? (
                 <button
                   disabled
-                  className="mt-8 flex w-full items-center justify-center gap-2 rounded-none bg-gray-300 px-6 py-4 text-sm font-medium text-gray-500 shadow-sm cursor-not-allowed uppercase tracking-wider w-full"
+                  className="mt-8 flex w-full items-center justify-center gap-2 rounded-none bg-gray-300 px-6 py-4 text-sm font-medium text-gray-500 shadow-sm cursor-not-allowed uppercase tracking-wider"
                 >
                   Proceed to Checkout (Fix stock issues)
                 </button>

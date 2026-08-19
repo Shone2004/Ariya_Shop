@@ -4,6 +4,7 @@ import { useCart } from "../hooks/useCart";
 import toast from "react-hot-toast";
 import { FiCreditCard, FiTruck, FiCheckCircle, FiEdit2, FiTag } from "react-icons/fi";
 import apiClient from "../utils/apiClient";
+import offerBrochure from "../assets/offer.jpeg";
 
 // Utility to load script dynamically
 const loadScript = (src) => {
@@ -24,6 +25,7 @@ const Checkout = () => {
   const { cart: cartItems, clearCart } = useCart();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showOffer, setShowOffer] = useState(false);
   const hasOutOfStockItems = cartItems.some(item => item.stockCount === 0 || item.quantity > item.stockCount);
   
   // Accordion Step State
@@ -73,11 +75,13 @@ const Checkout = () => {
     );
   }
 
+  // Pricing Calculations
+  const SHIPPING_FEE = 99; // Fixed ₹99 shipping charge
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const discountAmount = subtotal * discount;
   const subtotalAfterDiscount = subtotal - discountAmount;
-  const shipping = 0;
-  const total = subtotalAfterDiscount + shipping;
+  const offerCharge = showOffer ? 199 : 0; // ₹199 added when offer is selected
+  const total = subtotalAfterDiscount + SHIPPING_FEE + offerCharge;
 
   const handleAddressChange = (e) => {
     setShippingAddress({
@@ -103,8 +107,6 @@ const Checkout = () => {
   };
 
   const placeOrder = async () => {
-   
-
     try {
       setIsProcessing(true);
       
@@ -134,8 +136,8 @@ const Checkout = () => {
             phone: shippingAddress.phone
           },
           itemsPrice: subtotal,
-          taxPrice: 0,
-          shippingPrice: shipping,
+          taxPrice: offerCharge, // Stores the ₹199 offer fee
+          shippingPrice: SHIPPING_FEE,
           totalPrice: total
         }),
       });
@@ -147,14 +149,12 @@ const Checkout = () => {
       }
 
       if (paymentMethod === "cod") {
-    toast.success("Order placed successfully!");
-
-    clearCart();
-    setIsProcessing(false);
-    navigate("/order-success");
-
-    return;
-}
+        toast.success("Order placed successfully!");
+        clearCart();
+        setIsProcessing(false);
+        navigate("/order-success");
+        return;
+      }
 
       // 2. Load Razorpay Script
       const res = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
@@ -223,7 +223,6 @@ const Checkout = () => {
         toast.error(response.error.description || "Payment failed!");
       });
 
-      // Reset button state since Razorpay handles its own UI now
       setIsProcessing(false);
 
     } catch (error) {
@@ -420,6 +419,38 @@ const Checkout = () => {
           <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm sticky top-24">
             <h2 className="text-xl font-serif text-brand-dark mb-6">Order Summary</h2>
             
+            {/* Offer Brochure Section (Moved Above Amounts) */}
+            <div className="mb-6 pb-4 border-b border-gray-200">
+              <button 
+                type="button"
+                onClick={() => setShowOffer(!showOffer)}
+                className="flex w-full items-center justify-between rounded-md border border-amber-200 bg-amber-50/50 px-4 py-2.5 text-xs font-semibold text-amber-900 transition hover:bg-amber-100/50 cursor-pointer"
+              >
+                <span className="flex items-center gap-2">
+                  <FiTag className="text-amber-700" />
+                  Special Offer Pack (+₹199)
+                </span>
+                <span>{showOffer ? "Remove" : "Add Offer"}</span>
+              </button>
+
+              {showOffer && (
+                <div className="mt-3 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 p-2 animate-fadeIn">
+                  <img 
+                    src={offerBrochure} 
+                    alt="Current Promotional Offer" 
+                    className="w-full rounded object-cover"
+                  />
+                  <a 
+                    href={offerBrochure} 
+                    download="offer-brochure.jpeg"
+                    className="mt-2 block text-center text-xs font-medium text-primary hover:underline"
+                  >
+                    Download Brochure
+                  </a>
+                </div>
+              )}
+            </div>
+
             <dl className="space-y-4 text-sm text-gray-600 mb-6">
               <div className="flex items-center justify-between">
                 <dt>Items ({cartItems.length})</dt>
@@ -431,11 +462,15 @@ const Checkout = () => {
                   <dd className="font-medium">-₹{discountAmount.toFixed(2)}</dd>
                 </div>
               )}
+              {showOffer && (
+                <div className="flex items-center justify-between text-amber-700">
+                  <dt>Special Offer Pack</dt>
+                  <dd className="font-medium">+₹199.00</dd>
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <dt>Delivery</dt>
-                <dd className="font-medium text-gray-900">
-                  {shipping === 0 ? "99" : `₹${shipping.toFixed(2)}`}
-                </dd>
+                <dd className="font-medium text-gray-900">₹{SHIPPING_FEE.toFixed(2)}</dd>
               </div>
               <div className="border-t border-gray-200 pt-4 flex items-center justify-between text-xl font-bold text-brand-dark">
                 <dt>Order Total</dt>
@@ -443,7 +478,8 @@ const Checkout = () => {
               </div>
             </dl>
 
-            <div className="mb-6">
+            {/* Coupon Code Section */}
+            <div className="mb-6 border-t border-gray-200 pt-4">
               <label className="mb-2 flex items-center text-sm font-medium text-gray-700">
                 <FiTag className="mr-2" /> Have a coupon?
               </label>
@@ -469,7 +505,7 @@ const Checkout = () => {
               type="button" 
               onClick={placeOrder}
               disabled={isProcessing || hasOutOfStockItems || currentStep !== 3}
-              className={`flex w-full items-center justify-center gap-2 rounded-none px-6 py-4 text-sm font-medium text-white shadow-sm transition uppercase tracking-wider w-full ${
+              className={`flex w-full items-center justify-center gap-2 rounded-none px-6 py-4 text-sm font-medium text-white shadow-sm transition uppercase tracking-wider ${
                   hasOutOfStockItems
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : isProcessing 

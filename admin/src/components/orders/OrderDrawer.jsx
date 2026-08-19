@@ -1,17 +1,36 @@
 import { useState } from 'react'
 import { formatMoney } from '../../utils/formatters.js'
+import offerBrochure from '../../assets/offer.jpeg'
 
 function OrderDrawer({ order, close, update }) {
   const [tracking, setTracking] = useState(order.tracking || '')
-  const [isPaid, setIsPaid] = useState(order.isPaid === true || order.isPaid === 'Paid' || order.isPaid === 'paid')
-  
-  // Dynamic steps as requested: Pending -> Confirmed -> Processing -> Packed -> Shipped -> Delivered
+  const [isPaid, setIsPaid] = useState(
+    order.isPaid === true || order.isPaid === 'Paid' || order.isPaid === 'paid' || order.payment === 'Paid'
+  )
+  const [selectedStatus, setSelectedStatus] = useState(order.status || 'Pending')
+  const [showOffer, setShowOffer] = useState(false)
+
   const steps = ['Pending', 'Confirmed', 'Processing', 'Packed', 'Shipped', 'Delivered']
-  const current = steps.indexOf(order.status)
+  const current = steps.indexOf(selectedStatus)
   const id = order._id || order.id
 
-  const items = order.products || order.orderItems || [];
-  const shippingAddress = order.shippingAddress || {};
+  const items = order.products || order.orderItems || []
+  const shippingAddress = order.shippingAddress || {}
+
+  // Safe subtotal fallback calculation
+  const calculatedItemsPrice = items.reduce((acc, item) => {
+    return acc + (item.price || 0) * (item.quantity || 1)
+  }, 0)
+
+  const itemsPrice = order.itemsPrice ?? calculatedItemsPrice
+  const shippingPrice = order.shippingPrice ?? 99 // Fixed ₹99 shipping charge
+  const taxPrice = order.taxPrice ?? 0
+  const totalPrice = order.total ?? order.totalPrice ?? (itemsPrice + shippingPrice + taxPrice)
+
+  const handleSave = () => {
+    const finalStatus = selectedStatus === 'Confirmed' ? 'Processing' : selectedStatus
+    update(id, { tracking, isPaid, status: finalStatus })
+  }
 
   return (
     <div className="overlay drawer-overlay" onMouseDown={e => e.target === e.currentTarget && close()}>
@@ -28,7 +47,7 @@ function OrderDrawer({ order, close, update }) {
         {/* Customer Profile Box */}
         <div className="customer-box" style={{ display: 'flex', gap: '12px', padding: '16px', backgroundColor: '#fcfbf9', border: '1px solid #ece7df', borderRadius: '10px', marginBottom: '20px' }}>
           <div className="avatar" style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#b88a44', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px' }}>
-            {(order.customer || 'G').split(' ').map(x => x[0]).join('').toUpperCase()}
+            {(order.customer || (order.user && order.user.name) || 'G').split(' ').map(x => x[0]).join('').toUpperCase()}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
             <b style={{ color: '#2e241c', fontSize: '14px' }}>{order.customer || (order.user && order.user.name) || 'Guest'}</b>
@@ -44,30 +63,30 @@ function OrderDrawer({ order, close, update }) {
         <h4 style={{ margin: '0 0 10px 0', fontSize: '12px', letterSpacing: '1px', color: '#b88a44', fontWeight: 'bold' }}>ORDERED ITEMS</h4>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #ece7df', paddingBottom: '16px' }}>
           {items.map((item, idx) => {
-            const itemPrice = item.price || 0;
-            const itemQuantity = item.quantity || 1;
-            const subtotal = itemPrice * itemQuantity;
+            const itemPrice = item.price || 0
+            const itemQuantity = item.quantity || 1
+            const subtotal = itemPrice * itemQuantity
 
             return (
-              <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyBetween: 'space-between', gap: '12px' }}>
+              <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
                 <img 
                   src={item.image || 'https://via.placeholder.com/40?text=Product'} 
                   alt={item.name} 
                   style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #ece7df', backgroundColor: '#f9f6f0' }}
                   onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/40?text=Product';
+                    e.target.src = 'https://via.placeholder.com/40?text=Product'
                   }}
                 />
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px' }}>
                   <b style={{ fontSize: '13px', color: '#2e241c' }}>{item.name}</b>
                   <span style={{ fontSize: '11px', color: '#8c8276' }}>
                     {itemQuantity} × {formatMoney(itemPrice)}
-                    {item.selectedSize ? ` | Size: ${item.selectedSize}` : ""}
+                    {item.selectedSize ? ` | Size: ${item.selectedSize}` : ''}
                   </span>
                 </div>
                 <b style={{ fontSize: '13px', color: '#2e241c' }}>{formatMoney(subtotal)}</b>
               </div>
-            );
+            )
           })}
         </div>
 
@@ -76,24 +95,53 @@ function OrderDrawer({ order, close, update }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px', backgroundColor: '#fdfdfc', border: '1px solid #ece7df', borderRadius: '8px', marginBottom: '20px', fontSize: '12px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: '#8c8276' }}>Items Subtotal</span>
-            <b>{formatMoney(order.itemsPrice || order.total - (order.shippingPrice || 0))}</b>
+            <b>{formatMoney(itemsPrice)}</b>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: '#8c8276' }}>Shipping</span>
-            <span>{order.shippingPrice ? formatMoney(order.shippingPrice) : '₹99'}</span>
+            <span style={{ color: '#8c8276' }}>Shipping Charge</span>
+            <span>{formatMoney(shippingPrice)}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: '#8c8276' }}>Tax</span>
-            <span>{order.taxPrice ? formatMoney(order.taxPrice) : '₹0.00'}</span>
+            <span>{formatMoney(taxPrice)}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #ece7df', paddingTop: '8px', marginTop: '4px', fontSize: '14px' }}>
             <span style={{ fontWeight: 'bold', color: '#2e241c' }}>Total</span>
-            <b style={{ color: '#b88a44' }}>{formatMoney(order.total || order.totalPrice)}</b>
+            <b style={{ color: '#b88a44' }}>{formatMoney(totalPrice)}</b>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed #ece7df', paddingTop: '8px', marginTop: '4px', fontSize: '11px', color: '#8c8276' }}>
             <span>Payment Method: <b>{order.paymentMethod ? String(order.paymentMethod).toUpperCase() : 'RAZORPAY'}</b></span>
-            <span>Status: <b style={{ color: order.payment === 'Paid' ? '#2e7d32' : '#c62828' }}>{order.payment || 'Pending'}</b></span>
+            <span>Status: <b style={{ color: isPaid ? '#2e7d32' : '#c62828' }}>{isPaid ? 'Paid' : 'Pending'}</b></span>
           </div>
+        </div>
+
+        {/* Offer Brochure Section */}
+        <h4 style={{ margin: '0 0 10px 0', fontSize: '12px', letterSpacing: '1px', color: '#b88a44', fontWeight: 'bold' }}>PROMOTIONAL OFFER</h4>
+        <div style={{ marginBottom: '20px', padding: '12px', border: '1px solid #ece7df', borderRadius: '8px', backgroundColor: '#fcfbf9' }}>
+          <button 
+            type="button"
+            onClick={() => setShowOffer(!showOffer)}
+            style={{ width: '100%', padding: '8px', backgroundColor: '#b88a44', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px' }}
+          >
+            {showOffer ? 'Hide Offer Brochure' : 'View Included Offer Brochure'}
+          </button>
+          
+          {showOffer && (
+            <div style={{ marginTop: '12px', textAlign: 'center' }}>
+              <img 
+                src={offerBrochure} 
+                alt="Special Offer Brochure" 
+                style={{ width: '100%', borderRadius: '6px', border: '1px solid #ece7df', objectFit: 'contain' }}
+              />
+              <a 
+                href={offerBrochure} 
+                download="offer-brochure.jpeg"
+                style={{ display: 'inline-block', marginTop: '8px', fontSize: '11px', color: '#b88a44', fontWeight: 'bold', textDecoration: 'underline' }}
+              >
+                Download Brochure
+              </a>
+            </div>
+          )}
         </div>
 
         {/* Timeline */}
@@ -130,8 +178,8 @@ function OrderDrawer({ order, close, update }) {
           <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px', fontWeight: 'bold', color: '#b88a44' }}>
             ORDER STATUS
             <select 
-              value={order.status} 
-              onChange={e => update(id, { status: e.target.value })}
+              value={selectedStatus} 
+              onChange={e => setSelectedStatus(e.target.value)}
               style={{ padding: '8px 12px', border: '1px solid #d1c7bd', borderRadius: '6px', font: 'inherit', width: '100%', backgroundColor: '#fff' }}
             >
               {[...steps, 'Cancelled'].map(s => <option key={s}>{s}</option>)}
@@ -162,16 +210,16 @@ function OrderDrawer({ order, close, update }) {
 
           <button 
             className="primary full" 
-            onClick={() => update(id, { tracking, isPaid, status: order.status === 'Confirmed' ? 'Processing' : order.status })}
+            onClick={handleSave}
             style={{ padding: '10px', backgroundColor: '#2e241c', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', width: '100%' }}
           >
             Save tracking update
           </button>
           
-          {order.tracking && (
+          {tracking && (
             <div className="tracking-box" style={{ padding: '12px', backgroundColor: '#fcfbf9', border: '1px solid #ece7df', borderRadius: '6px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <small style={{ fontSize: '10px', color: '#b88a44', fontWeight: 'bold' }}>ACTIVE TRACKING NUMBER</small>
-              <b style={{ fontSize: '13px', color: '#2e241c' }}>{order.tracking}</b>
+              <b style={{ fontSize: '13px', color: '#2e241c' }}>{tracking}</b>
             </div>
           )}
           
