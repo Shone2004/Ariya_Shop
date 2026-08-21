@@ -58,7 +58,10 @@ const orderSchema = new mongoose.Schema({
   // Razorpay Specific Fields
   razorpay_order_id: { type: String },
   razorpay_payment_id: { type: String },
-  razorpay_signature: { type: String }
+  razorpay_signature: { type: String },
+  
+  // Custom customer note
+  note: { type: String, default: null }
 }, {
   timestamps: true
 });

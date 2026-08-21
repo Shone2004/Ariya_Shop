@@ -109,7 +109,8 @@ const createOrder = async (req, res) => {
       itemsPrice,
       taxPrice,
       shippingPrice,
-      totalPrice
+      totalPrice,
+      note
     } = req.body;
 
     if (!orderItems || orderItems.length === 0) {
@@ -214,6 +215,7 @@ const createOrder = async (req, res) => {
       totalPrice,
       status: "Pending",
       isPaid: false,
+      note: note || null
     });
 
     const createdOrder = await order.save();

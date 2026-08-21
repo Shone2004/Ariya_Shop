@@ -176,6 +176,16 @@ const OrderDetailsModal = ({ selectedOrder, onClose }) => {
             </div>
           </div>
 
+          {/* Note Card */}
+          {selectedOrder.note && (
+            <div className="bg-[#FAF9F6] p-5 rounded-lg border border-amber-100 bg-amber-50/20">
+              <h4 className="text-xs font-bold text-amber-800 uppercase tracking-wider mb-2 font-serif">Personalized Note / Instructions</h4>
+              <p className="text-sm text-gray-700 italic font-serif">
+                "{selectedOrder.note}"
+              </p>
+            </div>
+          )}
+
           {/* Shipment Tracking Section */}
           <div className="bg-white p-5 rounded-lg border border-gray-100">
             <h4 className="text-xs font-bold text-[#b88a44] uppercase tracking-wider mb-3">Shipment Tracking</h4>

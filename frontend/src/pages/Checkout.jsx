@@ -44,6 +44,7 @@ const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState("razorpay");
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
+  const [note, setNote] = useState("");
 
   const handleApplyCoupon = () => {
     if (couponCode.toUpperCase() === "ARIYA10") {
@@ -138,7 +139,8 @@ const Checkout = () => {
           itemsPrice: subtotal,
           taxPrice: offerCharge, // Stores the ₹199 offer fee
           shippingPrice: SHIPPING_FEE,
-          totalPrice: total
+          totalPrice: total,
+          note: note ? note.trim() : null
         }),
       });
 
@@ -404,6 +406,22 @@ const Checkout = () => {
                       );
                     })}
                   </ul>
+                </div>
+
+                {/* Custom note textbox */}
+                <div className="mb-6">
+                  <label className="mb-2 block text-sm font-medium text-gray-700 font-serif text-brand-dark">
+                    Add a personalized note or delivery instructions (Optional)
+                  </label>
+                  <textarea
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder="e.g. Please wrap this as a gift, or leave it with the security guard..."
+                    rows={3}
+                    maxLength={500}
+                    className="w-full rounded-md border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-dark focus:outline-none focus:ring-1 focus:ring-brand-dark resize-none font-sans"
+                  />
+                  <p className="mt-1 text-right text-[10px] text-gray-400 font-sans">{note.length}/500 characters</p>
                 </div>
                 
                 <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100 text-sm text-gray-700">
