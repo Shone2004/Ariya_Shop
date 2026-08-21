@@ -62,7 +62,7 @@ function OrderDrawer({ order, close, update }) {
         {/* Customer Note */}
         {order.note && (
           <div className="note-box" style={{ padding: '12px', backgroundColor: '#fff9e6', border: '1px solid #ffd880', borderRadius: '10px', marginBottom: '20px' }}>
-            <span style={{ fontSize: '10px', color: '#b88a44', textTransform: 'uppercase', tracking: '1px', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>CUSTOMER NOTE / INSTRUCTIONS</span>
+            <span style={{ fontSize: '10px', color: '#b88a44', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>CUSTOMER NOTE / INSTRUCTIONS</span>
             <p style={{ margin: 0, fontSize: '13px', color: '#2e241c', fontStyle: 'italic', whiteSpace: 'pre-wrap' }}>
               "{order.note}"
             </p>
