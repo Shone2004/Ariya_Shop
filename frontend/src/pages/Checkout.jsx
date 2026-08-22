@@ -323,37 +323,21 @@ const Checkout = () => {
             {currentStep === 2 ? (
               <div className="p-6 sm:p-8 border-t border-gray-200">
                 <form id="payment-form" onSubmit={handlePaymentSubmit}>
-                  <div className="mb-6 flex flex-col sm:flex-row gap-4">
-                    <label className={`flex-1 cursor-pointer rounded-lg border p-4 text-center ${paymentMethod === 'razorpay' ? 'border-brand-dark bg-blue-50/50' : 'border-gray-200'}`}>
-                      <input type="radio" name="payment" value="razorpay" checked={paymentMethod === 'razorpay'} onChange={() => setPaymentMethod('razorpay')} className="sr-only" />
+                  <div className="mb-6 flex gap-4">
+                    <label className="flex-1 cursor-pointer rounded-lg border p-4 text-center border-brand-dark bg-blue-50/50">
+                      <input type="radio" name="payment" value="razorpay" checked={true} readOnly className="sr-only" />
                       <span className="text-sm font-medium flex flex-col items-center gap-2">
-                        <FiCreditCard size={20} className={paymentMethod === 'razorpay' ? 'text-brand-dark' : 'text-gray-400'} />
+                        <FiCreditCard size={20} className="text-brand-dark" />
                         Pay Online (Razorpay)
-                      </span>
-                    </label>
-                    <label className={`flex-1 cursor-pointer rounded-lg border p-4 text-center ${paymentMethod === 'cod' ? 'border-brand-dark bg-blue-50/50' : 'border-gray-200'}`}>
-                      <input type="radio" name="payment" value="cod" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} className="sr-only" />
-                      <span className="text-sm font-medium flex flex-col items-center gap-2">
-                        <FiTruck size={20} className={paymentMethod === 'cod' ? 'text-brand-dark' : 'text-gray-400'} />
-                        Cash on Delivery
                       </span>
                     </label>
                   </div>
 
                   <div className="mt-6 mb-8">
-                    {paymentMethod === 'razorpay' && (
-                      <div className="rounded-lg bg-gray-50 p-6 text-sm text-gray-600 border border-gray-200 animate-fadeIn h-full flex flex-col justify-center">
-                        <p className="font-medium text-gray-800 mb-2">Secure Online Payment</p>
-                        <p>You will be securely redirected to Razorpay to complete your payment using Credit/Debit Cards, UPI, Netbanking, or Wallets.</p>
-                      </div>
-                    )}
-
-                    {paymentMethod === 'cod' && (
-                      <div className="rounded-lg bg-gray-50 p-6 text-sm text-gray-600 border border-gray-200 animate-fadeIn h-full flex items-center">
-                        <FiTruck className="mr-3 text-primary text-xl" />
-                        You can pay in cash to our courier when you receive the goods at your doorstep.
-                      </div>
-                    )}
+                    <div className="rounded-lg bg-gray-50 p-6 text-sm text-gray-600 border border-gray-200 animate-fadeIn h-full flex flex-col justify-center">
+                      <p className="font-medium text-gray-800 mb-2">Secure Online Payment</p>
+                      <p>You will be securely redirected to Razorpay to complete your payment using Credit/Debit Cards, UPI, Netbanking, or Wallets.</p>
+                    </div>
                   </div>
 
                   <div className="mt-8 border-t border-gray-200 pt-6">
@@ -365,9 +349,9 @@ const Checkout = () => {
               </div>
             ) : completedSteps[2] ? (
               <div className="px-6 py-4 sm:px-14 sm:py-6 text-sm text-gray-600 flex items-center gap-2">
-                {paymentMethod === 'razorpay' ? <FiCreditCard className="text-gray-500" size={20} /> : <FiTruck className="text-gray-500" size={20} />}
+                <FiCreditCard className="text-gray-500" size={20} />
                 <span className="font-medium text-gray-900">
-                  {paymentMethod === 'razorpay' ? 'Pay Online (Razorpay)' : 'Cash on Delivery'}
+                  Pay Online (Razorpay)
                 </span>
               </div>
             ) : null}
