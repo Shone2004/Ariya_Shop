@@ -21,6 +21,11 @@ const CATEGORIES = [
   { id: "bangles", name: "Bangles", image: catBangles },
   { id: "brooch", name: "Brooch", image: catBrooch },
   { id: "organizer", name: "Organizer", image: catOrganizer },
+  { id: "hair-accessories", name: "Hair Accessories", image: catShopAll },
+  { id: "nose-pin", name: "Nose Pin", image: catShopAll },
+  { id: "waist-chains", name: "Waist Chains", image: catShopAll },
+  { id: "anklets", name: "Anklets", image: catShopAll },
+  { id: "indian-jewellery", name: "Indian Jewellery", image: catShopAll },
 ];
 
 const CategoryCarousel = ({ activeCategory, onSelectCategory }) => {

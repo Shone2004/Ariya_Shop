@@ -243,6 +243,11 @@ function ProductModal({ product, onClose, onSubmit }) {
                   <option>Bangles</option>
                   <option>Brooch</option>
                   <option>Organizer</option>
+                  <option>Hair Accessories</option>
+                  <option>Nose Pin</option>
+                  <option>Waist Chains</option>
+                  <option>Anklets</option>
+                  <option>Indian Jewellery</option>
                 </select>
               </label>
               <label>Collection

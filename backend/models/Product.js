@@ -21,7 +21,20 @@ const productSchema = new mongoose.Schema({
   category: {
     type: String,
     required: [true, 'Category is required'],
-    enum: ['Earrings', 'Necklaces', 'Rings', 'Bracelets', 'Bangles', 'Brooch', 'Organizer']
+    enum: [
+      'Earrings',
+      'Necklaces',
+      'Rings',
+      'Bracelets',
+      'Bangles',
+      'Brooch',
+      'Organizer',
+      'Hair Accessories',
+      'Nose Pin',
+      'Waist Chains',
+      'Anklets',
+      'Indian Jewellery'
+    ]
   },
   collection: {
     type: String,

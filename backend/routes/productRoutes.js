@@ -33,7 +33,12 @@ router.post(
         'Bracelets',
         'Bangles',
         'Brooch',
-        'Organizer'
+        'Organizer',
+        'Hair Accessories',
+        'Nose Pin',
+        'Waist Chains',
+        'Anklets',
+        'Indian Jewellery'
       ]),
       check('price', 'Selling Price must be a positive number').isFloat({ min: 0 }),
       check('stockCount', 'Stock Quantity must be a positive integer').isInt({ min: 0 }),
